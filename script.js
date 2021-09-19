@@ -105,10 +105,22 @@ const renderCharts = () => {
         </header>
         <div id="chart-${package.name}"></div>
         <footer>
-          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}">GitHub</a>
-          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/security/dependabot">Dependabot alerts</a>
-          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/network/dependents">Dependents</a>
-          <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/${package.name}">NPM</a>
+          <nav>
+            <ul>
+              <li>
+                <a target="_blank" rel="noopener" href="https://github.com/${package.repo}">GitHub</a>
+              </li>
+              <li>
+                <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/security/dependabot">Dependabot alerts</a>
+              </li>
+              <li>
+                <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/network/dependents">Dependents</a>
+              </li>
+              <li>
+                <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/${package.name}">NPM</a>
+              </li>
+            </ul>
+          </nav>
         </footer>
         `;
       document.getElementById("chartsContainer").appendChild(chartContainer);
