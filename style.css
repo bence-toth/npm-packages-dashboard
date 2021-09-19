@@ -26,6 +26,10 @@ body {
   width: 100%;
 }
 
+#chartsContainer :first-child {
+  grid-column: 1 / -1;
+}
+
 .chartContainer {
   padding: 20px;
   border: 1px solid hsl(0, 0%, 85%);

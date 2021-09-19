@@ -89,36 +89,44 @@ const getPackagesData = () => {
         aggregatedPackagesData.push(weeklyData);
       });
       aggregatedPackagesData.sort(sortByLastWeeksDownloads);
+
       resolve(aggregatedPackagesData);
     });
   });
   return packagesDataPromise;
 };
 
-const getChartMarkup = (package) => `
-  <header>
-    <h2>${package.name}</h2>
-  </header>
-  <div id="chart-${package.name}"></div>
-  <footer>
-    <nav>
-      <ul>
-        <li>
-          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}">GitHub</a>
-        </li>
-        <li>
-          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/security/dependabot">Dependabot alerts</a>
-        </li>
-        <li>
-          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/network/dependents">Dependents</a>
-        </li>
-        <li>
-          <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/${package.name}">NPM</a>
-        </li>
-      </ul>
-    </nav>
-  </footer>
-`;
+const getChartMarkup = (package) => {
+  const footer = package.repo
+    ? `
+      <footer>
+        <nav>
+          <ul>
+            <li>
+              <a target="_blank" rel="noopener" href="https://github.com/${package.repo}">GitHub</a>
+            </li>
+            <li>
+              <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/security/dependabot">Dependabot alerts</a>
+            </li>
+            <li>
+              <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/network/dependents">Dependents</a>
+            </li>
+            <li>
+              <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/${package.name}">NPM</a>
+            </li>
+          </ul>
+        </nav>
+      </footer>
+    `
+    : "";
+  return `
+    <header>
+      <h2>${package.name}</h2>
+    </header>
+    <div id="chart-${package.id ?? package.name}"></div>
+    ${footer}
+  `;
+};
 
 const getChartParams = (packageData) => ({
   data: packageData.downloads.map((dataPoint) => ({
@@ -138,6 +146,26 @@ const getChartParams = (packageData) => ({
 });
 
 const renderCharts = (packagesData) => {
+  const totalPackageDownloadData = packagesData.reduce(
+    (accumulator, current) => ({
+      downloads: accumulator.downloads.map((accumulatedWeeklyValue, index) => ({
+        day: accumulatedWeeklyValue.day,
+        downloads:
+          accumulatedWeeklyValue.downloads + current.downloads[index].downloads,
+      })),
+    })
+  );
+  const chartContainer = document.createElement("div");
+  chartContainer.classList.add("chartContainer");
+  chartContainer.innerHTML = getChartMarkup({
+    name: "Overall package downloads",
+    id: "overall",
+    downloads: totalPackageDownloadData,
+  });
+  document.getElementById("chartsContainer").appendChild(chartContainer);
+  const chart = new Taucharts.Chart(getChartParams(totalPackageDownloadData));
+  chart.renderTo(document.getElementById(`chart-overall`));
+
   packagesData.forEach((packageData) => {
     const chartContainer = document.createElement("div");
     chartContainer.classList.add("chartContainer");
