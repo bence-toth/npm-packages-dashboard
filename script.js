@@ -101,16 +101,16 @@ const renderCharts = () => {
       chartContainer.classList.add("chartContainer");
       chartContainer.innerHTML = `
         <header>
-        <h2>${package.name}</h2>
+          <h2>${package.name}</h2>
         </header>
-          <div id="chart-${package.name}"></div>
+        <div id="chart-${package.name}"></div>
         <footer>
           <a target="_blank" rel="noopener" href="https://github.com/${package.repo}">GitHub</a>
           <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/security/dependabot">Dependabot alerts</a>
           <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/network/dependents">Dependents</a>
           <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/${package.name}">NPM</a>
         </footer>
-      `;
+        `;
       document.getElementById("chartsContainer").appendChild(chartContainer);
       const chart = new Taucharts.Chart({
         data: package.downloads.map((dataPoint) => ({
@@ -124,6 +124,7 @@ const renderCharts = () => {
           fitModel: "fit-width",
         },
         guide: {
+          interpolate: "smooth-keep-extremum",
           x: { tickFormat: "month" },
         },
       });
