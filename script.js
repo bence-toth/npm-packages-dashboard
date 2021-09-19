@@ -100,10 +100,16 @@ const renderCharts = () => {
       const chartContainer = document.createElement("div");
       chartContainer.classList.add("chartContainer");
       chartContainer.innerHTML = `
+        <header>
         <h2>${package.name}</h2>
-        <div>
+        </header>
           <div id="chart-${package.name}"></div>
-        </div>
+        <footer>
+          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}">GitHub</a>
+          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/security/dependabot">Dependabot alerts</a>
+          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/network/dependents">Dependents</a>
+          <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/${package.name}">NPM</a>
+        </footer>
       `;
       document.getElementById("chartsContainer").appendChild(chartContainer);
       const chart = new Taucharts.Chart({
