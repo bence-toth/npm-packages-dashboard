@@ -40,22 +40,23 @@ const todayYear = today.getFullYear();
 const todayMonth = String(today.getMonth() + 1).padStart(2, "0");
 const todayDay = String(today.getDate() + 1).padStart(2, "0");
 const todayDate = [todayYear, todayMonth, todayDay].join("-");
+const weekLength = 7;
 
 const startDate = "2019-01-01";
-const data = [];
+const packagesData = [];
+
+const aggregateWeeksDataFromIndex = (allData, index) =>
+  allData.downloads
+    .slice(index, index + weekLength)
+    .reduce((accumulator, current) => ({
+      downloads: accumulator.downloads + current.downloads,
+      day: accumulator.day,
+    }));
 
 const aggregateWeeklyData = (dailyData) => {
-  var weekLength = 7;
   const weeklyData = [];
-  for (var i = 0; i < dailyData.downloads.length; i += weekLength) {
-    weeklyData.push(
-      dailyData.downloads
-        .slice(i, i + weekLength)
-        .reduce((accumulator, current) => ({
-          downloads: accumulator.downloads + current.downloads,
-          day: accumulator.day,
-        }))
-    );
+  for (let index = 0; index < dailyData.downloads.length; index += weekLength) {
+    weeklyData.push(aggregateWeeksDataFromIndex(dailyData, index));
   }
   return {
     ...dailyData,
@@ -63,8 +64,11 @@ const aggregateWeeklyData = (dailyData) => {
   };
 };
 
-const getLastWeeksDownloads = (data) =>
-  data.downloads[data.downloads.length - 1].downloads;
+const getLastWeeksDownloads = (packageData) =>
+  packageData.downloads[packageData.downloads.length - 1].downloads;
+
+const sortByLastWeeksDownloads = (left, right) =>
+  getLastWeeksDownloads(right) - getLastWeeksDownloads(left);
 
 const getPackagesData = () => {
   const packagesDataPromise = new Promise((resolve) => {
@@ -73,76 +77,75 @@ const getPackagesData = () => {
         `https://api.npmjs.org/downloads/range/${startDate}:${today}/${package.name}`
       )
         .then((response) => response.json())
-        .then((data) => ({
+        .then((packageData) => ({
           ...package,
-          downloads: data.downloads,
+          downloads: packageData.downloads,
         }))
     );
     Promise.all(fetches).then((packagesData) => {
+      const aggregatedPackagesData = [];
       packagesData.forEach((packageDownloadsInfo) => {
-        const dailyData = aggregateWeeklyData(packageDownloadsInfo);
-        data.push(dailyData);
-        return data;
+        const weeklyData = aggregateWeeklyData(packageDownloadsInfo);
+        aggregatedPackagesData.push(weeklyData);
       });
-      data.sort(
-        (left, right) =>
-          getLastWeeksDownloads(right) - getLastWeeksDownloads(left)
-      );
-      resolve(data);
+      aggregatedPackagesData.sort(sortByLastWeeksDownloads);
+      resolve(aggregatedPackagesData);
     });
   });
   return packagesDataPromise;
 };
 
-const renderCharts = () => {
-  getPackagesData().then((data) => {
-    data.forEach((package) => {
-      const chartContainer = document.createElement("div");
-      chartContainer.classList.add("chartContainer");
-      chartContainer.innerHTML = `
-        <header>
-          <h2>${package.name}</h2>
-        </header>
-        <div id="chart-${package.name}"></div>
-        <footer>
-          <nav>
-            <ul>
-              <li>
-                <a target="_blank" rel="noopener" href="https://github.com/${package.repo}">GitHub</a>
-              </li>
-              <li>
-                <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/security/dependabot">Dependabot alerts</a>
-              </li>
-              <li>
-                <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/network/dependents">Dependents</a>
-              </li>
-              <li>
-                <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/${package.name}">NPM</a>
-              </li>
-            </ul>
-          </nav>
-        </footer>
-        `;
-      document.getElementById("chartsContainer").appendChild(chartContainer);
-      const chart = new Taucharts.Chart({
-        data: package.downloads.map((dataPoint) => ({
-          downloads: dataPoint.downloads,
-          date: new Date(dataPoint.day),
-        })),
-        type: "line",
-        x: "date",
-        y: "downloads",
-        settings: {
-          fitModel: "fit-width",
-        },
-        guide: {
-          interpolate: "smooth-keep-extremum",
-          x: { tickFormat: "month" },
-        },
-      });
-      chart.renderTo(document.getElementById(`chart-${package.name}`));
-    });
+const getChartMarkup = (package) => `
+  <header>
+    <h2>${package.name}</h2>
+  </header>
+  <div id="chart-${package.name}"></div>
+  <footer>
+    <nav>
+      <ul>
+        <li>
+          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}">GitHub</a>
+        </li>
+        <li>
+          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/security/dependabot">Dependabot alerts</a>
+        </li>
+        <li>
+          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/network/dependents">Dependents</a>
+        </li>
+        <li>
+          <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/${package.name}">NPM</a>
+        </li>
+      </ul>
+    </nav>
+  </footer>
+`;
+
+const getChartParams = (packageData) => ({
+  data: packageData.downloads.map((dataPoint) => ({
+    downloads: dataPoint.downloads,
+    date: new Date(dataPoint.day),
+  })),
+  type: "line",
+  x: "date",
+  y: "downloads",
+  settings: {
+    fitModel: "fit-width",
+  },
+  guide: {
+    interpolate: "smooth-keep-extremum",
+    x: { tickFormat: "month" },
+  },
+});
+
+const renderCharts = (packagesData) => {
+  packagesData.forEach((packageData) => {
+    const chartContainer = document.createElement("div");
+    chartContainer.classList.add("chartContainer");
+    chartContainer.innerHTML = getChartMarkup(packageData);
+    document.getElementById("chartsContainer").appendChild(chartContainer);
+    const chart = new Taucharts.Chart(getChartParams(packageData));
+    chart.renderTo(document.getElementById(`chart-${packageData.name}`));
   });
 };
 
-renderCharts();
+getPackagesData().then(renderCharts);
