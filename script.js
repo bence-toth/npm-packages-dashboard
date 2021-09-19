@@ -106,24 +106,22 @@ const renderCharts = () => {
         </div>
       `;
       document.getElementById("chartsContainer").appendChild(chartContainer);
-      const chart = new ApexCharts(
-        document.getElementById(`chart-${package.name}`),
-        {
-          chart: {
-            type: "line",
-          },
-          series: [
-            {
-              name: "Downloads",
-              data: package.downloads.map((dataPoint) => dataPoint.downloads),
-            },
-          ],
-          xaxis: {
-            categories: package.downloads.map((dataPoint) => dataPoint.day),
-          },
-        }
-      );
-      chart.render();
+      const chart = new Taucharts.Chart({
+        data: package.downloads.map((dataPoint) => ({
+          downloads: dataPoint.downloads,
+          date: new Date(dataPoint.day),
+        })),
+        type: "line",
+        x: "date",
+        y: "downloads",
+        settings: {
+          fitModel: "fit-width",
+        },
+        guide: {
+          x: { tickFormat: "month" },
+        },
+      });
+      chart.renderTo(document.getElementById(`chart-${package.name}`));
     });
   });
 };
