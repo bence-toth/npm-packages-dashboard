@@ -97,23 +97,32 @@ const getPackagesData = () => {
 const renderCharts = () => {
   getPackagesData().then((data) => {
     data.forEach((package) => {
-      const chartElement = document.createElement("div");
-      chartElement.id = package.name;
-      document.body.appendChild(chartElement);
-      const chart = new ApexCharts(document.getElementById(package.name), {
-        chart: {
-          type: "line",
-        },
-        series: [
-          {
-            name: "Downloads",
-            data: package.downloads.map((dataPoint) => dataPoint.downloads),
+      const chartContainer = document.createElement("div");
+      chartContainer.classList.add("chartContainer");
+      chartContainer.innerHTML = `
+        <h2>${package.name}</h2>
+        <div>
+          <div id="chart-${package.name}"></div>
+        </div>
+      `;
+      document.getElementById("chartsContainer").appendChild(chartContainer);
+      const chart = new ApexCharts(
+        document.getElementById(`chart-${package.name}`),
+        {
+          chart: {
+            type: "line",
           },
-        ],
-        xaxis: {
-          categories: package.downloads.map((dataPoint) => dataPoint.day),
-        },
-      });
+          series: [
+            {
+              name: "Downloads",
+              data: package.downloads.map((dataPoint) => dataPoint.downloads),
+            },
+          ],
+          xaxis: {
+            categories: package.downloads.map((dataPoint) => dataPoint.day),
+          },
+        }
+      );
       chart.render();
     });
   });
