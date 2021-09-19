@@ -34,3 +34,89 @@ const packages = [
   { name: "split-mp3", repo: "bence-toth/split-mp3" },
   { name: "triangle-mosaic", repo: "bence-toth/triangle-mosaic" },
 ];
+
+const today = new Date();
+const todayYear = today.getFullYear();
+const todayMonth = String(today.getMonth() + 1).padStart(2, "0");
+const todayDay = String(today.getDate() + 1).padStart(2, "0");
+const todayDate = [todayYear, todayMonth, todayDay].join("-");
+
+const startDate = "2019-01-01";
+const data = [];
+
+const aggregateWeeklyData = (dailyData) => {
+  var weekLength = 7;
+  const weeklyData = [];
+  for (var i = 0; i < dailyData.downloads.length; i += weekLength) {
+    weeklyData.push(
+      dailyData.downloads
+        .slice(i, i + weekLength)
+        .reduce((accumulator, current) => ({
+          downloads: accumulator.downloads + current.downloads,
+          day: accumulator.day,
+        }))
+    );
+  }
+  return {
+    ...dailyData,
+    downloads: weeklyData.slice(0, -1),
+  };
+};
+
+const getLastWeeksDownloads = (data) =>
+  data.downloads[data.downloads.length - 1].downloads;
+
+const getPackagesData = () => {
+  const packagesDataPromise = new Promise((resolve) => {
+    const fetches = packages.map((package) =>
+      fetch(
+        `https://api.npmjs.org/downloads/range/${startDate}:${today}/${package.name}`
+      )
+        .then((response) => response.json())
+        .then((data) => ({
+          ...package,
+          downloads: data.downloads,
+        }))
+    );
+    Promise.all(fetches).then((packagesData) => {
+      packagesData.forEach((packageDownloadsInfo) => {
+        const dailyData = aggregateWeeklyData(packageDownloadsInfo);
+        data.push(dailyData);
+        return data;
+      });
+      data.sort(
+        (left, right) =>
+          getLastWeeksDownloads(right) - getLastWeeksDownloads(left)
+      );
+      resolve(data);
+    });
+  });
+  return packagesDataPromise;
+};
+
+const renderCharts = () => {
+  getPackagesData().then((data) => {
+    data.forEach((package) => {
+      const chartElement = document.createElement("div");
+      chartElement.id = package.name;
+      document.body.appendChild(chartElement);
+      const chart = new ApexCharts(document.getElementById(package.name), {
+        chart: {
+          type: "line",
+        },
+        series: [
+          {
+            name: "Downloads",
+            data: package.downloads.map((dataPoint) => dataPoint.downloads),
+          },
+        ],
+        xaxis: {
+          categories: package.downloads.map((dataPoint) => dataPoint.day),
+        },
+      });
+      chart.render();
+    });
+  });
+};
+
+renderCharts();
