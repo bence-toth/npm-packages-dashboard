@@ -92,7 +92,7 @@ const getPackagesDataFromGitHub = (packages) => {
         .then((response) => response.json())
         .then((packageData) => ({
           stars: packageData.stargazers_count,
-          watchers: packageData.watchers_count,
+          watchers: packageData.subscribers_count,
           forks: packageData.forks_count,
           issues: packageData.open_issues_count,
           ...package,
