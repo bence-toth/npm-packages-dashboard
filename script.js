@@ -72,12 +72,10 @@ const getPackagesDataFromNpm = (packages) => {
         `https://api.npmjs.org/downloads/range/${startDate}:${today}/${package.name}`
       )
         .then((response) => response.json())
-        .then((packageData) => {
-          return {
+        .then((packageData) => ({
             ...package,
             downloads: aggregateWeeklyData(packageData.downloads),
-          };
-        })
+        }))
     );
     Promise.all(fetches).then((packagesData) => {
       packagesData.sort(sortByLastWeeksDownloads);
@@ -89,20 +87,17 @@ const getPackagesDataFromNpm = (packages) => {
 
 const getPackagesDataFromGitHub = (packages) => {
   const packagesPromise = new Promise((resolve) => {
-    const fetches = packages.map((package) => {
+    const fetches = packages.map((package) =>
       fetch(`https://api.github.com/repos/${package.repo}`)
         .then((response) => response.json())
-        .then((packageData) => {
-          console.log(packageData);
-          return {
+        .then((packageData) => ({
+          stars: packageData.stargazers_count,
             ...package,
-          };
-        });
-    });
+        }))
+    );
     Promise.all(fetches).then((packagesData) => {
       resolve(packagesData);
     });
-    resolve(packages);
   });
   return packagesPromise;
 };
