@@ -118,6 +118,7 @@ const getChartMarkup = (package) => `
     <h2>${package.name}</h2>
     <ul>
       <li>★ ${package.stars}</li>
+      <li>⑂ ${package.forks}</li>
     </ul>
   </header>
   <div id="chart-${package.name}"></div>
