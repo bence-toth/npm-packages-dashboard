@@ -124,6 +124,7 @@ const getChartMarkup = (package) => `
       <li><i class="fa fa-star" aria-hidden="true"></i> ${package.stars}</li>
       <li><i class="fa fa-eye" aria-hidden="true"></i> ${package.watchers}</li>
       <li><i class="fa fa-code-fork" aria-hidden="true"></i> ${package.forks}</li>
+      <li><i class="fa fa-exclamation-circle" aria-hidden="true"></i> ${package.issues}</li>
     </ul>
   </header>
   <div id="chart-${package.name}"></div>
