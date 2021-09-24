@@ -102,9 +102,18 @@ const getPackagesDataFromGitHub = (packages) => {
   return packagesPromise;
 };
 
-const getChartMarkup = (package) => {
-  const footer = package.repo
-    ? `
+const getSummaryChartMarkup = () => `
+  <header>
+    <h2>Overall package downloads</h2>
+  </header>
+  <div id="chart-summary"></div>
+`;
+
+const getChartMarkup = (package) => `
+  <header>
+    <h2>${package.name}</h2>
+  </header>
+  <div id="chart-${package.name}"></div>
       <footer>
         <nav>
           <ul>
@@ -123,16 +132,7 @@ const getChartMarkup = (package) => {
           </ul>
         </nav>
       </footer>
-    `
-    : "";
-  return `
-    <header>
-      <h2>${package.name}</h2>
-    </header>
-    <div id="chart-${package.id ?? package.name}"></div>
-    ${footer}
   `;
-};
 
 const getChartParams = (packageData) => ({
   data: packageData.downloads.map((dataPoint) => ({
@@ -163,14 +163,10 @@ const renderCharts = (packagesData) => {
   );
   const chartContainer = document.createElement("div");
   chartContainer.classList.add("chartContainer");
-  chartContainer.innerHTML = getChartMarkup({
-    name: "Overall package downloads",
-    id: "overall",
-    downloads: totalPackageDownloadData,
-  });
+  chartContainer.innerHTML = getSummaryChartMarkup();
   document.getElementById("chartsContainer").appendChild(chartContainer);
   const chart = new Taucharts.Chart(getChartParams(totalPackageDownloadData));
-  chart.renderTo(document.getElementById(`chart-overall`));
+  chart.renderTo(document.getElementById("chart-summary"));
 
   packagesData.forEach((packageData) => {
     const chartContainer = document.createElement("div");
