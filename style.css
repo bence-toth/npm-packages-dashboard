@@ -53,12 +53,12 @@ body {
   margin-top: 10px;
   display: flex;
   justify-content: flex-end;
-  font-size: 14px;
 }
 
 .chartContainer ul {
   display: flex;
   list-style-type: none;
+  font-size: 14px;
 }
 
 .chartContainer li:not(:first-child):before {
