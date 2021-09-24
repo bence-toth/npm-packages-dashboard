@@ -61,7 +61,7 @@ body {
   list-style-type: none;
 }
 
-.chartContainer footer li:not(:first-child):before {
+.chartContainer li:not(:first-child):before {
   content: "";
   border-right: 1px solid hsl(0, 0%, 80%);
   margin-inline: 10px;
