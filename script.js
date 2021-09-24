@@ -47,9 +47,9 @@ const packagesData = [];
 
 const aggregateWeeksDataFromIndex = (dailyData, index) =>
   dailyData.slice(index, index + weekLength).reduce((accumulator, current) => ({
-      downloads: accumulator.downloads + current.downloads,
-      day: accumulator.day,
-    }));
+    downloads: accumulator.downloads + current.downloads,
+    day: accumulator.day,
+  }));
 
 const aggregateWeeklyData = (dailyData) => {
   const weeklyData = [];
@@ -74,7 +74,7 @@ const getPackagesDataFromNpm = (packages) => {
         .then((response) => response.json())
         .then((packageData) => {
           return {
-          ...package,
+            ...package,
             downloads: aggregateWeeklyData(packageData.downloads),
           };
         })
@@ -85,6 +85,26 @@ const getPackagesDataFromNpm = (packages) => {
     });
   });
   return packagesDataPromise;
+};
+
+const getPackagesDataFromGitHub = (packages) => {
+  const packagesPromise = new Promise((resolve) => {
+    const fetches = packages.map((package) => {
+      fetch(`https://api.github.com/repos/${package.repo}`)
+        .then((response) => response.json())
+        .then((packageData) => {
+          console.log(packageData);
+          return {
+            ...package,
+          };
+        });
+    });
+    Promise.all(fetches).then((packagesData) => {
+      resolve(packagesData);
+    });
+    resolve(packages);
+  });
+  return packagesPromise;
 };
 
 const getChartMarkup = (package) => {
@@ -167,4 +187,6 @@ const renderCharts = (packagesData) => {
   });
 };
 
-getPackagesDataFromNpm(packages).then(renderCharts);
+getPackagesDataFromNpm(packages)
+  .then(getPackagesDataFromGitHub)
+  .then(renderCharts);
