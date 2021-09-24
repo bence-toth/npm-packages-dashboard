@@ -154,30 +154,38 @@ const getChartParams = (packageData) => ({
   },
 });
 
-const renderCharts = (packagesData) => {
-  const totalPackageDownloadData = packagesData.reduce(
+const renderAggregationChart = (packagesData) => {
+  const aggregatedPackagesData = packagesData.reduce(
     (accumulator, current) => ({
       downloads: accumulator.downloads.map((accumulatedWeeklyValue, index) => ({
         day: accumulatedWeeklyValue.day,
         downloads:
           accumulatedWeeklyValue.downloads + current.downloads[index].downloads,
       })),
+      stars: accumulator.stars + current.stars,
     })
   );
   const chartContainer = document.createElement("div");
   chartContainer.classList.add("chartContainer");
   chartContainer.innerHTML = getSummaryChartMarkup();
   document.getElementById("chartsContainer").appendChild(chartContainer);
-  const chart = new Taucharts.Chart(getChartParams(totalPackageDownloadData));
+  const chart = new Taucharts.Chart(getChartParams(aggregatedPackagesData));
   chart.renderTo(document.getElementById("chart-summary"));
+};
 
-  packagesData.forEach((packageData) => {
+const renderPackageChart = (packageData) => {
     const chartContainer = document.createElement("div");
     chartContainer.classList.add("chartContainer");
     chartContainer.innerHTML = getChartMarkup(packageData);
     document.getElementById("chartsContainer").appendChild(chartContainer);
     const chart = new Taucharts.Chart(getChartParams(packageData));
     chart.renderTo(document.getElementById(`chart-${packageData.name}`));
+};
+
+const renderCharts = (packagesData) => {
+  renderAggregationChart(packagesData);
+  packagesData.forEach((packageData) => {
+    renderPackageChart(packageData);
   });
 };
 
