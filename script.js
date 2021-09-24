@@ -73,8 +73,8 @@ const getPackagesDataFromNpm = (packages) => {
       )
         .then((response) => response.json())
         .then((packageData) => ({
-            ...package,
-            downloads: aggregateWeeklyData(packageData.downloads),
+          ...package,
+          downloads: aggregateWeeklyData(packageData.downloads),
         }))
     );
     Promise.all(fetches).then((packagesData) => {
@@ -92,7 +92,7 @@ const getPackagesDataFromGitHub = (packages) => {
         .then((response) => response.json())
         .then((packageData) => ({
           stars: packageData.stargazers_count,
-            ...package,
+          ...package,
         }))
     );
     Promise.all(fetches).then((packagesData) => {
@@ -102,9 +102,12 @@ const getPackagesDataFromGitHub = (packages) => {
   return packagesPromise;
 };
 
-const getSummaryChartMarkup = () => `
+const getSummaryChartMarkup = (summary) => `
   <header>
     <h2>Overall package downloads</h2>
+    <ul>
+      <li>★ ${summary.stars}</li>
+    </ul>
   </header>
   <div id="chart-summary"></div>
 `;
@@ -117,25 +120,25 @@ const getChartMarkup = (package) => `
     </ul>
   </header>
   <div id="chart-${package.name}"></div>
-      <footer>
-        <nav>
-          <ul>
-            <li>
-              <a target="_blank" rel="noopener" href="https://github.com/${package.repo}">GitHub</a>
-            </li>
-            <li>
-              <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/security/dependabot">Dependabot alerts</a>
-            </li>
-            <li>
-              <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/network/dependents">Dependents</a>
-            </li>
-            <li>
-              <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/${package.name}">NPM</a>
-            </li>
-          </ul>
-        </nav>
-      </footer>
-  `;
+  <footer>
+    <nav>
+      <ul>
+        <li>
+          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}">GitHub</a>
+        </li>
+        <li>
+          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/security/dependabot">Dependabot alerts</a>
+        </li>
+        <li>
+          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/network/dependents">Dependents</a>
+        </li>
+        <li>
+          <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/${package.name}">NPM</a>
+        </li>
+      </ul>
+    </nav>
+  </footer>
+`;
 
 const getChartParams = (packageData) => ({
   data: packageData.downloads.map((dataPoint) => ({
@@ -167,19 +170,19 @@ const renderAggregationChart = (packagesData) => {
   );
   const chartContainer = document.createElement("div");
   chartContainer.classList.add("chartContainer");
-  chartContainer.innerHTML = getSummaryChartMarkup();
+  chartContainer.innerHTML = getSummaryChartMarkup(aggregatedPackagesData);
   document.getElementById("chartsContainer").appendChild(chartContainer);
   const chart = new Taucharts.Chart(getChartParams(aggregatedPackagesData));
   chart.renderTo(document.getElementById("chart-summary"));
 };
 
 const renderPackageChart = (packageData) => {
-    const chartContainer = document.createElement("div");
-    chartContainer.classList.add("chartContainer");
-    chartContainer.innerHTML = getChartMarkup(packageData);
-    document.getElementById("chartsContainer").appendChild(chartContainer);
-    const chart = new Taucharts.Chart(getChartParams(packageData));
-    chart.renderTo(document.getElementById(`chart-${packageData.name}`));
+  const chartContainer = document.createElement("div");
+  chartContainer.classList.add("chartContainer");
+  chartContainer.innerHTML = getChartMarkup(packageData);
+  document.getElementById("chartsContainer").appendChild(chartContainer);
+  const chart = new Taucharts.Chart(getChartParams(packageData));
+  chart.renderTo(document.getElementById(`chart-${packageData.name}`));
 };
 
 const renderCharts = (packagesData) => {
