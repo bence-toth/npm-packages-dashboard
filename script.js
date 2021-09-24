@@ -112,6 +112,7 @@ const getSummaryChartMarkup = (summary) => `
       <li><i class="fa fa-star" aria-hidden="true"></i> ${summary.stars}</li>
       <li><i class="fa fa-eye" aria-hidden="true"></i> ${summary.watchers}</li>
       <li><i class="fa fa-code-fork" aria-hidden="true"></i> ${summary.forks}</li>
+      <li><i class="fa fa-exclamation-circle" aria-hidden="true"></i> ${summary.issues}</li>
     </ul>
   </header>
   <div id="chart-summary"></div>
@@ -176,6 +177,7 @@ const renderAggregationChart = (packagesData) => {
       stars: accumulator.stars + current.stars,
       watchers: accumulator.stars + current.watchers,
       forks: accumulator.forks + current.forks,
+      issues: accumulator.issues + current.issues,
     })
   );
   const chartContainer = document.createElement("div");
