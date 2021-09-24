@@ -92,6 +92,7 @@ const getPackagesDataFromGitHub = (packages) => {
         .then((response) => response.json())
         .then((packageData) => ({
           stars: packageData.stargazers_count,
+          watchers: packageData.watchers_count,
           forks: packageData.forks_count,
           ...package,
         }))
