@@ -108,9 +108,9 @@ const getSummaryChartMarkup = (summary) => `
   <header>
     <h2>Overall package downloads</h2>
     <ul>
-      <li>★ ${summary.stars}</li>
-      <li>👁 ${summary.watchers}</li>
-      <li>⑂ ${summary.forks}</li>
+      <li><i class="fa fa-star" aria-hidden="true"></i> ${summary.stars}</li>
+      <li><i class="fa fa-eye" aria-hidden="true"></i> ${summary.watchers}</li>
+      <li><i class="fa fa-code-fork" aria-hidden="true"></i> ${summary.forks}</li>
     </ul>
   </header>
   <div id="chart-summary"></div>
@@ -120,9 +120,9 @@ const getChartMarkup = (package) => `
   <header>
     <h2>${package.name}</h2>
     <ul>
-      <li>★ ${package.stars}</li>
-      <li>👁 ${package.watchers}</li>
-      <li>⑂ ${package.forks}</li>
+      <li><i class="fa fa-star" aria-hidden="true"></i> ${package.stars}</li>
+      <li><i class="fa fa-eye" aria-hidden="true"></i> ${package.watchers}</li>
+      <li><i class="fa fa-code-fork" aria-hidden="true"></i> ${package.forks}</li>
     </ul>
   </header>
   <div id="chart-${package.name}"></div>
