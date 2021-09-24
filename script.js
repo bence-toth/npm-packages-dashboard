@@ -108,6 +108,7 @@ const getSummaryChartMarkup = (summary) => `
     <h2>Overall package downloads</h2>
     <ul>
       <li>★ ${summary.stars}</li>
+      <li>⑂ ${summary.forks}</li>
     </ul>
   </header>
   <div id="chart-summary"></div>
@@ -168,6 +169,7 @@ const renderAggregationChart = (packagesData) => {
           accumulatedWeeklyValue.downloads + current.downloads[index].downloads,
       })),
       stars: accumulator.stars + current.stars,
+      forks: accumulator.forks + current.forks,
     })
   );
   const chartContainer = document.createElement("div");
