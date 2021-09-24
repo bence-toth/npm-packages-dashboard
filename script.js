@@ -92,6 +92,7 @@ const getPackagesDataFromGitHub = (packages) => {
         .then((response) => response.json())
         .then((packageData) => ({
           stars: packageData.stargazers_count,
+          forks: packageData.forks_count,
           ...package,
         }))
     );
@@ -107,6 +108,7 @@ const getSummaryChartMarkup = (summary) => `
     <h2>Overall package downloads</h2>
     <ul>
       <li>★ ${summary.stars}</li>
+      <li>⑂ ${summary.forks}</li>
     </ul>
   </header>
   <div id="chart-summary"></div>
@@ -117,6 +119,7 @@ const getChartMarkup = (package) => `
     <h2>${package.name}</h2>
     <ul>
       <li>★ ${package.stars}</li>
+      <li>⑂ ${package.forks}</li>
     </ul>
   </header>
   <div id="chart-${package.name}"></div>
@@ -166,6 +169,7 @@ const renderAggregationChart = (packagesData) => {
           accumulatedWeeklyValue.downloads + current.downloads[index].downloads,
       })),
       stars: accumulator.stars + current.stars,
+      forks: accumulator.forks + current.forks,
     })
   );
   const chartContainer = document.createElement("div");
