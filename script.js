@@ -94,6 +94,7 @@ const getPackagesDataFromGitHub = (packages) => {
           stars: packageData.stargazers_count,
           watchers: packageData.watchers_count,
           forks: packageData.forks_count,
+          issues: packageData.open_issues_count,
           ...package,
         }))
     );
