@@ -175,7 +175,7 @@ const renderAggregationChart = (packagesData) => {
           accumulatedWeeklyValue.downloads + current.downloads[index].downloads,
       })),
       stars: accumulator.stars + current.stars,
-      watchers: accumulator.stars + current.watchers,
+      watchers: accumulator.watchers + current.watchers,
       forks: accumulator.forks + current.forks,
       issues: accumulator.issues + current.issues,
     })
