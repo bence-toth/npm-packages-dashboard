@@ -122,10 +122,26 @@ const getChartMarkup = (package) => `
   <header>
     <h2>${package.name}</h2>
     <ul>
-      <li><i class="fa fa-star" aria-hidden="true"></i> ${package.stars}</li>
-      <li><i class="fa fa-eye" aria-hidden="true"></i> ${package.watchers}</li>
-      <li><i class="fa fa-code-fork" aria-hidden="true"></i> ${package.forks}</li>
-      <li><i class="fa fa-exclamation-circle" aria-hidden="true"></i> ${package.issues}</li>
+      <li>
+        <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/stargazers">
+          <i class="fa fa-star" aria-hidden="true"></i> ${package.stars}
+        </a>
+      </li>
+      <li>
+        <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/watchers">
+          <i class="fa fa-eye" aria-hidden="true"></i> ${package.watchers}
+        </a>
+      </li>
+      <li>
+        <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/network/members">
+          <i class="fa fa-code-fork" aria-hidden="true"></i> ${package.forks}
+        </a>
+      </li>
+      <li>
+        <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/issues">
+          <i class="fa fa-exclamation-circle" aria-hidden="true"></i> ${package.issues}
+        </a>
+      </li>
     </ul>
   </header>
   <div id="chart-${package.name}"></div>
