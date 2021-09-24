@@ -45,23 +45,18 @@ const weekLength = 7;
 const startDate = "2019-01-01";
 const packagesData = [];
 
-const aggregateWeeksDataFromIndex = (allData, index) =>
-  allData.downloads
-    .slice(index, index + weekLength)
-    .reduce((accumulator, current) => ({
-      downloads: accumulator.downloads + current.downloads,
-      day: accumulator.day,
-    }));
+const aggregateWeeksDataFromIndex = (dailyData, index) =>
+  dailyData.slice(index, index + weekLength).reduce((accumulator, current) => ({
+    downloads: accumulator.downloads + current.downloads,
+    day: accumulator.day,
+  }));
 
 const aggregateWeeklyData = (dailyData) => {
   const weeklyData = [];
-  for (let index = 0; index < dailyData.downloads.length; index += weekLength) {
+  for (let index = 0; index < dailyData.length; index += weekLength) {
     weeklyData.push(aggregateWeeksDataFromIndex(dailyData, index));
   }
-  return {
-    ...dailyData,
-    downloads: weeklyData.slice(0, -1),
-  };
+  return weeklyData.slice(0, -1);
 };
 
 const getLastWeeksDownloads = (packageData) =>
@@ -70,7 +65,7 @@ const getLastWeeksDownloads = (packageData) =>
 const sortByLastWeeksDownloads = (left, right) =>
   getLastWeeksDownloads(right) - getLastWeeksDownloads(left);
 
-const getPackagesData = () => {
+const getPackagesDataFromNpm = (packages) => {
   const packagesDataPromise = new Promise((resolve) => {
     const fetches = packages.map((package) =>
       fetch(
@@ -79,54 +74,71 @@ const getPackagesData = () => {
         .then((response) => response.json())
         .then((packageData) => ({
           ...package,
-          downloads: packageData.downloads,
+          downloads: aggregateWeeklyData(packageData.downloads),
         }))
     );
     Promise.all(fetches).then((packagesData) => {
-      const aggregatedPackagesData = [];
-      packagesData.forEach((packageDownloadsInfo) => {
-        const weeklyData = aggregateWeeklyData(packageDownloadsInfo);
-        aggregatedPackagesData.push(weeklyData);
-      });
-      aggregatedPackagesData.sort(sortByLastWeeksDownloads);
-
-      resolve(aggregatedPackagesData);
+      packagesData.sort(sortByLastWeeksDownloads);
+      resolve(packagesData);
     });
   });
   return packagesDataPromise;
 };
 
-const getChartMarkup = (package) => {
-  const footer = package.repo
-    ? `
-      <footer>
-        <nav>
-          <ul>
-            <li>
-              <a target="_blank" rel="noopener" href="https://github.com/${package.repo}">GitHub</a>
-            </li>
-            <li>
-              <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/security/dependabot">Dependabot alerts</a>
-            </li>
-            <li>
-              <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/network/dependents">Dependents</a>
-            </li>
-            <li>
-              <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/${package.name}">NPM</a>
-            </li>
-          </ul>
-        </nav>
-      </footer>
-    `
-    : "";
-  return `
-    <header>
-      <h2>${package.name}</h2>
-    </header>
-    <div id="chart-${package.id ?? package.name}"></div>
-    ${footer}
-  `;
+const getPackagesDataFromGitHub = (packages) => {
+  const packagesPromise = new Promise((resolve) => {
+    const fetches = packages.map((package) =>
+      fetch(`https://api.github.com/repos/${package.repo}`)
+        .then((response) => response.json())
+        .then((packageData) => ({
+          stars: packageData.stargazers_count,
+          ...package,
+        }))
+    );
+    Promise.all(fetches).then((packagesData) => {
+      resolve(packagesData);
+    });
+  });
+  return packagesPromise;
 };
+
+const getSummaryChartMarkup = (summary) => `
+  <header>
+    <h2>Overall package downloads</h2>
+    <ul>
+      <li>★ ${summary.stars}</li>
+    </ul>
+  </header>
+  <div id="chart-summary"></div>
+`;
+
+const getChartMarkup = (package) => `
+  <header>
+    <h2>${package.name}</h2>
+    <ul>
+      <li>★ ${package.stars}</li>
+    </ul>
+  </header>
+  <div id="chart-${package.name}"></div>
+  <footer>
+    <nav>
+      <ul>
+        <li>
+          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}">GitHub</a>
+        </li>
+        <li>
+          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/security/dependabot">Dependabot alerts</a>
+        </li>
+        <li>
+          <a target="_blank" rel="noopener" href="https://github.com/${package.repo}/network/dependents">Dependents</a>
+        </li>
+        <li>
+          <a target="_blank" rel="noopener" href="https://www.npmjs.com/package/${package.name}">NPM</a>
+        </li>
+      </ul>
+    </nav>
+  </footer>
+`;
 
 const getChartParams = (packageData) => ({
   data: packageData.downloads.map((dataPoint) => ({
@@ -145,35 +157,41 @@ const getChartParams = (packageData) => ({
   },
 });
 
-const renderCharts = (packagesData) => {
-  const totalPackageDownloadData = packagesData.reduce(
+const renderAggregationChart = (packagesData) => {
+  const aggregatedPackagesData = packagesData.reduce(
     (accumulator, current) => ({
       downloads: accumulator.downloads.map((accumulatedWeeklyValue, index) => ({
         day: accumulatedWeeklyValue.day,
         downloads:
           accumulatedWeeklyValue.downloads + current.downloads[index].downloads,
       })),
+      stars: accumulator.stars + current.stars,
     })
   );
   const chartContainer = document.createElement("div");
   chartContainer.classList.add("chartContainer");
-  chartContainer.innerHTML = getChartMarkup({
-    name: "Overall package downloads",
-    id: "overall",
-    downloads: totalPackageDownloadData,
-  });
+  chartContainer.innerHTML = getSummaryChartMarkup(aggregatedPackagesData);
   document.getElementById("chartsContainer").appendChild(chartContainer);
-  const chart = new Taucharts.Chart(getChartParams(totalPackageDownloadData));
-  chart.renderTo(document.getElementById(`chart-overall`));
+  const chart = new Taucharts.Chart(getChartParams(aggregatedPackagesData));
+  chart.renderTo(document.getElementById("chart-summary"));
+};
 
+const renderPackageChart = (packageData) => {
+  const chartContainer = document.createElement("div");
+  chartContainer.classList.add("chartContainer");
+  chartContainer.innerHTML = getChartMarkup(packageData);
+  document.getElementById("chartsContainer").appendChild(chartContainer);
+  const chart = new Taucharts.Chart(getChartParams(packageData));
+  chart.renderTo(document.getElementById(`chart-${packageData.name}`));
+};
+
+const renderCharts = (packagesData) => {
+  renderAggregationChart(packagesData);
   packagesData.forEach((packageData) => {
-    const chartContainer = document.createElement("div");
-    chartContainer.classList.add("chartContainer");
-    chartContainer.innerHTML = getChartMarkup(packageData);
-    document.getElementById("chartsContainer").appendChild(chartContainer);
-    const chart = new Taucharts.Chart(getChartParams(packageData));
-    chart.renderTo(document.getElementById(`chart-${packageData.name}`));
+    renderPackageChart(packageData);
   });
 };
 
-getPackagesData().then(renderCharts);
+getPackagesDataFromNpm(packages)
+  .then(getPackagesDataFromGitHub)
+  .then(renderCharts);
