@@ -120,6 +120,7 @@ const getChartMarkup = (package) => `
     <h2>${package.name}</h2>
     <ul>
       <li>★ ${package.stars}</li>
+      <li>👁 ${package.watchers}</li>
       <li>⑂ ${package.forks}</li>
     </ul>
   </header>
