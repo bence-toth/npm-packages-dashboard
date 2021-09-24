@@ -45,23 +45,18 @@ const weekLength = 7;
 const startDate = "2019-01-01";
 const packagesData = [];
 
-const aggregateWeeksDataFromIndex = (allData, index) =>
-  allData.downloads
-    .slice(index, index + weekLength)
-    .reduce((accumulator, current) => ({
+const aggregateWeeksDataFromIndex = (dailyData, index) =>
+  dailyData.slice(index, index + weekLength).reduce((accumulator, current) => ({
       downloads: accumulator.downloads + current.downloads,
       day: accumulator.day,
     }));
 
 const aggregateWeeklyData = (dailyData) => {
   const weeklyData = [];
-  for (let index = 0; index < dailyData.downloads.length; index += weekLength) {
+  for (let index = 0; index < dailyData.length; index += weekLength) {
     weeklyData.push(aggregateWeeksDataFromIndex(dailyData, index));
   }
-  return {
-    ...dailyData,
-    downloads: weeklyData.slice(0, -1),
-  };
+  return weeklyData.slice(0, -1);
 };
 
 const getLastWeeksDownloads = (packageData) =>
@@ -70,27 +65,23 @@ const getLastWeeksDownloads = (packageData) =>
 const sortByLastWeeksDownloads = (left, right) =>
   getLastWeeksDownloads(right) - getLastWeeksDownloads(left);
 
-const getPackagesData = () => {
+const getPackagesDataFromNpm = (packages) => {
   const packagesDataPromise = new Promise((resolve) => {
     const fetches = packages.map((package) =>
       fetch(
         `https://api.npmjs.org/downloads/range/${startDate}:${today}/${package.name}`
       )
         .then((response) => response.json())
-        .then((packageData) => ({
+        .then((packageData) => {
+          return {
           ...package,
-          downloads: packageData.downloads,
-        }))
+            downloads: aggregateWeeklyData(packageData.downloads),
+          };
+        })
     );
     Promise.all(fetches).then((packagesData) => {
-      const aggregatedPackagesData = [];
-      packagesData.forEach((packageDownloadsInfo) => {
-        const weeklyData = aggregateWeeklyData(packageDownloadsInfo);
-        aggregatedPackagesData.push(weeklyData);
-      });
-      aggregatedPackagesData.sort(sortByLastWeeksDownloads);
-
-      resolve(aggregatedPackagesData);
+      packagesData.sort(sortByLastWeeksDownloads);
+      resolve(packagesData);
     });
   });
   return packagesDataPromise;
@@ -176,4 +167,4 @@ const renderCharts = (packagesData) => {
   });
 };
 
-getPackagesData().then(renderCharts);
+getPackagesDataFromNpm(packages).then(renderCharts);
