@@ -183,6 +183,26 @@ const renderCharts = (packagesData) => {
   });
 };
 
-getPackagesDataFromNpm(packages)
-  .then(getPackagesDataFromGitHub)
-  .then(renderCharts);
+const loadTauchartsStylesheet = () => {
+  const darkModeMediaQueryMatcher = window.matchMedia(
+    "(prefers-color-scheme: dark)"
+  );
+  const stylesheetURL = darkModeMediaQueryMatcher.matches
+    ? "https://cdn.jsdelivr.net/npm/taucharts@2/dist/taucharts.dark.min.css"
+    : "https://cdn.jsdelivr.net/npm/taucharts@2/dist/taucharts.min.css";
+  document
+    .getElementsByTagName("head")[0]
+    .insertAdjacentHTML(
+      "beforeend",
+      `<link rel="stylesheet" type="text/css" href="${stylesheetURL}" />`
+    );
+};
+
+const init = () => {
+  loadTauchartsStylesheet();
+  getPackagesDataFromNpm(packages)
+    .then(getPackagesDataFromGitHub)
+    .then(renderCharts);
+};
+
+init();
