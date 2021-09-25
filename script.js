@@ -1,40 +1,3 @@
-const packages = [
-  { name: "@bence.a.toth/cra-template", repo: "bence-toth/cra-template" },
-  { name: "@bence.a.toth/eslint-config", repo: "bence-toth/eslint-config" },
-  { name: "create-react-thing", repo: "bence-toth/create-react-thing" },
-  { name: "react-hook-clipboard", repo: "bence-toth/react-hook-clipboard" },
-  {
-    name: "react-hook-device-orientation",
-    repo: "bence-toth/react-hook-device-orientation",
-  },
-  { name: "react-hook-geolocation", repo: "bence-toth/react-hook-geolocation" },
-  {
-    name: "react-hook-local-web-storage",
-    repo: "bence-toth/react-hook-local-web-storage",
-  },
-  { name: "react-hook-media-query", repo: "bence-toth/react-hook-media-query" },
-  { name: "react-hook-mouse", repo: "bence-toth/react-hook-mouse" },
-  {
-    name: "react-hook-screen-orientation",
-    repo: "bence-toth/react-hook-screen-orientation",
-  },
-  { name: "react-hook-selection", repo: "bence-toth/react-hook-selection" },
-  {
-    name: "react-hook-session-web-storage",
-    repo: "bence-toth/react-hook-session-web-storage",
-  },
-  {
-    name: "react-hook-viewport-size",
-    repo: "bence-toth/react-hook-viewport-size",
-  },
-  {
-    name: "react-hook-viewport-visibility",
-    repo: "bence-toth/react-hook-viewport-visibility",
-  },
-  { name: "split-mp3", repo: "bence-toth/split-mp3" },
-  { name: "triangle-mosaic", repo: "bence-toth/triangle-mosaic" },
-];
-
 const today = new Date();
 const todayYear = today.getFullYear();
 const todayMonth = String(today.getMonth() + 1).padStart(2, "0");
@@ -220,6 +183,26 @@ const renderCharts = (packagesData) => {
   });
 };
 
-getPackagesDataFromNpm(packages)
-  .then(getPackagesDataFromGitHub)
-  .then(renderCharts);
+const loadTauchartsStylesheet = () => {
+  const darkModeMediaQueryMatcher = window.matchMedia(
+    "(prefers-color-scheme: dark)"
+  );
+  const stylesheetURL = darkModeMediaQueryMatcher.matches
+    ? "https://cdn.jsdelivr.net/npm/taucharts@2/dist/taucharts.dark.min.css"
+    : "https://cdn.jsdelivr.net/npm/taucharts@2/dist/taucharts.min.css";
+  document
+    .getElementsByTagName("head")[0]
+    .insertAdjacentHTML(
+      "beforeend",
+      `<link rel="stylesheet" type="text/css" href="${stylesheetURL}" />`
+    );
+};
+
+const init = () => {
+  loadTauchartsStylesheet();
+  getPackagesDataFromNpm(packages)
+    .then(getPackagesDataFromGitHub)
+    .then(renderCharts);
+};
+
+init();
