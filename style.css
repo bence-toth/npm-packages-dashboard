@@ -44,6 +44,13 @@ body {
   }
 }
 
+@media (max-width: 640px) {
+  #chartsContainer {
+    padding: 0;
+    row-gap: 0;
+  }
+}
+
 .chartContainer {
   padding: 20px;
   border: 1px solid hsl(0, 0%, 85%);
@@ -59,6 +66,30 @@ body {
   }
 }
 
+@media (max-width: 640px) {
+  .chartContainer {
+    border-width: 0;
+    border-bottom-width: 1px;
+    padding-inline: 12px;
+    padding-block: 32px;
+    border-radius: 0;
+  }
+
+  .chartContainer:first-child {
+    padding-top: 12px;
+  }
+
+  .chartContainer:last-child {
+    padding-bottom: 12px;
+  }
+}
+
+@media (max-width: 640px) and (prefers-color-scheme: dark) {
+  .chartContainer {
+    border-color: hsl(0, 0%, 25%);
+  }
+}
+
 .chartContainer header {
   margin-bottom: 20px;
   display: flex;
@@ -66,14 +97,34 @@ body {
   align-items: center;
 }
 
+@media (max-width: 640px) {
+  .chartContainer header {
+    flex-direction: column;
+  }
+}
+
 .chartContainer h2 {
   font-size: 20px;
+}
+
+@media (max-width: 640px) {
+  .chartContainer h2 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
 }
 
 .chartContainer ul {
   display: flex;
   list-style-type: none;
   font-size: 14px;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .chartContainer ul {
+    font-size: 12px;
+  }
 }
 
 .chartContainer li:not(:first-child):before {
@@ -100,4 +151,11 @@ body {
   margin-top: 10px;
   display: flex;
   justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .chartContainer footer {
+    margin-top: 16px;
+    justify-content: center;
+  }
 }
