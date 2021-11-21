@@ -31,6 +31,10 @@ const packages = [
     name: "react-hook-viewport-visibility",
     repo: "bence-toth/react-hook-viewport-visibility",
   },
+  {
+    name: "react-hook-text-overflow",
+    repo: "bence-toth/react-hook-text-overflow",
+  },
   { name: "split-mp3", repo: "bence-toth/split-mp3" },
   { name: "triangle-mosaic", repo: "bence-toth/triangle-mosaic" },
 ];
