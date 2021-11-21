@@ -15,6 +15,9 @@ const aggregateWeeksDataFromIndex = (dailyData, index) =>
   }));
 
 const aggregateWeeklyData = (dailyData) => {
+  if (!dailyData) {
+    return [];
+  }
   const weeklyData = [];
   for (let index = 0; index < dailyData.length; index += weekLength) {
     weeklyData.push(aggregateWeeksDataFromIndex(dailyData, index));
@@ -22,8 +25,12 @@ const aggregateWeeklyData = (dailyData) => {
   return weeklyData.slice(0, -1);
 };
 
-const getLastWeeksDownloads = (packageData) =>
-  packageData.downloads[packageData.downloads.length - 1].downloads;
+const getLastWeeksDownloads = (packageData) => {
+  if (packageData.downloads.length === 0) {
+    return 0;
+  }
+  return packageData.downloads[packageData.downloads.length - 1].downloads;
+};
 
 const sortByLastWeeksDownloads = (left, right) =>
   getLastWeeksDownloads(right) - getLastWeeksDownloads(left);
@@ -151,7 +158,8 @@ const renderAggregationChart = (packagesData) => {
       downloads: accumulator.downloads.map((accumulatedWeeklyValue, index) => ({
         day: accumulatedWeeklyValue.day,
         downloads:
-          accumulatedWeeklyValue.downloads + current.downloads[index].downloads,
+          accumulatedWeeklyValue.downloads +
+          (current?.downloads[index]?.downloads ?? 0),
       })),
       stars: accumulator.stars + current.stars,
       watchers: accumulator.watchers + current.watchers,
@@ -172,6 +180,9 @@ const renderPackageChart = (packageData) => {
   chartContainer.classList.add("chartContainer");
   chartContainer.innerHTML = getChartMarkup(packageData);
   document.getElementById("chartsContainer").appendChild(chartContainer);
+  if (packageData.downloads.length === 0) {
+    return;
+  }
   const chart = new Taucharts.Chart(getChartParams(packageData));
   chart.renderTo(document.getElementById(`chart-${packageData.name}`));
 };
