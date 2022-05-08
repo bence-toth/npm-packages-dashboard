@@ -37,4 +37,5 @@ const packages = [
   },
   { name: "split-mp3", repo: "bence-toth/split-mp3" },
   { name: "triangle-mosaic", repo: "bence-toth/triangle-mosaic" },
+  { name: "yup-nope", repo: "bence-toth/yup-nope" },
 ];
