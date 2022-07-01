@@ -46,4 +46,8 @@ const packages = [
     name: "cra-template-typescript-blank",
     repo: "bence-toth/cra-template-typescript-blank",
   },
+  {
+    name: "cra-template-javascript-blank",
+    repo: "bence-toth/cra-template-javascript-blank",
+  },
 ];
