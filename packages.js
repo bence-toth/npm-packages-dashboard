@@ -42,4 +42,8 @@ const packages = [
     name: "react-hook-on-mount",
     repo: "bence-toth/react-hook-on-mount",
   },
+  {
+    name: "cra-template-typescript-blank",
+    repo: "bence-toth/cra-template-typescript-blank",
+  },
 ];
